@@ -19,7 +19,7 @@ class PhimLeSpider(scrapy.Spider):
                     splash.private_mode_enabled = false
                     local url = splash.args.url
                     assert(splash:go(url))
-                    assert(splash:wait(1))
+                    assert(splash:wait(4))
                     return splash:html()
                 end
             """
@@ -34,7 +34,8 @@ class PhimLeSpider(scrapy.Spider):
     def parse_list_film(self,response):
         for url in list(map(lambda x: x.url, (LinkExtractor(restrict_xpaths="//div[@class = 'col-md-2 col-xs-6 movie-item']").extract_links(response)))):
             yield Request(url=url, callback=self.parse_film)
-
+        
+        
    
     def parse_film(self, response):
         key = list(map(remove_tags,response.xpath("//div[@class = 'cf pt-30 row']/div[@class = 'col-md-6 ']/table/tr/td[1]").getall()))
@@ -50,7 +51,7 @@ class PhimLeSpider(scrapy.Spider):
         btn = btn[0].strip()
         if(btn == 'XEM PHIM'):
            video_btn = LinkExtractor(restrict_xpaths="//div[@class = 'mt-10']").extract_links(response)
-           yield SplashRequest(url= video_btn[0].url,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':5,'timeout':3000},meta = {"item":result})
+           yield SplashRequest(url= video_btn[0].url,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':5,'timeout':3600},meta = {"item":result})
         else:
            yield None
     
@@ -62,9 +63,9 @@ class PhimLeSpider(scrapy.Spider):
         yield result
     
     def get_link(self,response):
-        link = []
-        link_360 = response.xpath("//source[@label = '360']/@src").getall()
+        link = dict()
         link_720 = response.xpath("//source[@label = '720']/@src").getall()
-        link.append(link_360[0])
-        link.append(link_720[0])
+        link_360 = response.xpath("//source[@label = '360']/@src").getall()
+        link["360p"] = link_360
+        link["720p"] = link_720
         return link

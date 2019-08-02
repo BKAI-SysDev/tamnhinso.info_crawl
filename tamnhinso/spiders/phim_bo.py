@@ -51,5 +51,6 @@ class TnsSpider(scrapy.Spider):
 
         else:
            yield None
+           
 
        

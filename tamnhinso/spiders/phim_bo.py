@@ -51,20 +51,23 @@ class TnsSpider(scrapy.Spider):
             # episode_btn = list(map(remove_tags,response.xpath("//div[@class = 'col-md-6']/ul[@class = 'chap-list']/li/a").getall()))
             # episode_btn = list(map(lambda x:x.strip(),episode_btn))   
             # link_films = dict()
-            for x in episode_btn:
-                self.link_films[x] = 0                                                                                                                                 
             video_btn = LinkExtractor(restrict_xpaths="//div[@class = 'col-md-6']/ul[@class = 'chap-list']/li").extract_links(response)
             for x in video_btn:
-                yield SplashRequest(url= x.url,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':8,'timeout':3600},meta = {"list_links":link_films,"url":x.url})
+                link = x.url
+                yield SplashRequest(url= link,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':8,'timeout':3600},meta = {"url":link})
+            result['links'] = self.link_films
+            self.link_films.clear()
+            inspect_response(self,response)
+            yield result
         else:
            yield None
 
     def parse_link_film(self,response):
-        list_links = response.meta.get("list_links")
         url = response.meta.get("url")
         pattern=re.compile(r'(?<=tap-)(\d+)')
         episode = pattern.findall(url)
-        self.link_films[episode] = self.get_link(response)
+        self.link_films[episode[0]] = self.get_link(response)
+
 
     def get_link(self,response):
         link = dict()
@@ -75,3 +78,4 @@ class TnsSpider(scrapy.Spider):
         return link
     
 
+    # docker run command:docker run -p 8050:8050 scrapinghub/splash --max-timeout 3600

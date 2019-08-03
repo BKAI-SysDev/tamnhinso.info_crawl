@@ -54,19 +54,19 @@ class TnsSpider(scrapy.Spider):
             video_btn = LinkExtractor(restrict_xpaths="//div[@class = 'col-md-6']/ul[@class = 'chap-list']/li").extract_links(response)
             for x in video_btn:
                 link = x.url
-                yield SplashRequest(url= link,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':8,'timeout':3600},meta = {"url":link})
+                yield SplashRequest(url= link,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':8,'timeout':3600})
             result['links'] = self.link_films
             self.link_films.clear()
-            inspect_response(self,response)
             yield result
         else:
-           yield None
+            yield None
 
     def parse_link_film(self,response):
-        url = response.meta.get("url")
+        # url = response.meta.get("url")
         pattern=re.compile(r'(?<=tap-)(\d+)')
-        episode = pattern.findall(url)
+        episode = pattern.findall(response.url)
         self.link_films[episode[0]] = self.get_link(response)
+        yield self.link_films
 
 
     def get_link(self,response):

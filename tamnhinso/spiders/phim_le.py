@@ -51,7 +51,7 @@ class PhimLeSpider(scrapy.Spider):
         btn = btn[0].strip()
         if(btn == 'XEM PHIM'):
            video_btn = LinkExtractor(restrict_xpaths="//div[@class = 'mt-10']").extract_links(response)
-           yield SplashRequest(url= video_btn[0].url,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':5,'timeout':3600},meta = {"item":result})
+           yield SplashRequest(url= video_btn[0].url,callback = self.parse_link_film,endpoint = 'execute',args={'lua_source': self.script,'wait':8,'timeout':3600},meta = {"item":result})
         else:
            yield None
     
